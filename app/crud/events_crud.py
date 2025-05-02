@@ -5,6 +5,7 @@ from bson import ObjectId
 from typing import List
 from fastapi import HTTPException
 from datetime import datetime
+from pymongo import ReturnDocument
 
 # Create new event
 async def create_event(event: EventCreate):
@@ -128,3 +129,26 @@ async def delete_all_events(force_delete: bool = False):
     else :
         print(f"There is no events to delete ! all events have been deleted")
         return 0, 0
+
+async def update_event_based_on_id(event_id, update_query:dict):
+    validated_event_id = get_event_id(event_id)
+    db = get_db()
+    updated_event = await db["events"].find_one_and_update(
+        {"_id": validated_event_id},
+        update_query,
+        return_document=ReturnDocument.AFTER
+    )
+    return updated_event
+
+# Updating event tags
+async def updating_event_tags(event_id:str, tags:List[str], replace:bool = False):
+    if replace:
+        update_query = {"$set": {"tags": tags}}
+    else:
+        update_query = {"$addToSet": {"tags": {"$each": tags}}}
+    updated_event = await update_event_based_on_id(event_id, update_query)
+    if not updated_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    else:
+        updated_event_out = get_event_out(id=str(updated_event["_id"]), event=updated_event)
+        return updated_event_out

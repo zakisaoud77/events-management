@@ -133,3 +133,21 @@ async def delete_all_events(
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting all events because of: {str(e)}")
+
+@router.patch(
+    "/update_event_tags/{event_id}/",
+    summary = "Updating event tags",
+    description = "Updating or replacing event tags. The event tags can be replaced by the new tags if `replace=true`",
+    response_model=EventOut
+)
+async def update_event_tags(
+    event_id: str,
+    tags: List[str] = Query(...),
+    replace: bool = Query(False, description="Replace existing tags if True, else add the new tags")
+):
+    try:
+       updated_event = await events_crud.updating_event_tags(event_id=event_id, tags=tags, replace=replace)
+       return updated_event
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cannot update tags of event {event_id}, because of: {str(e)}")
+
