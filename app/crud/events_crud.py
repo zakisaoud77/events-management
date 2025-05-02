@@ -152,3 +152,13 @@ async def updating_event_tags(event_id:str, tags:List[str], replace:bool = False
     else:
         updated_event_out = get_event_out(id=str(updated_event["_id"]), event=updated_event)
         return updated_event_out
+
+# Updating event datetime
+async def updating_event_datetime(event_id:str, start:datetime, stop:datetime=None):
+    update_query = {"$set": {"start": start, "stop": stop}}
+    updated_event = await update_event_based_on_id(event_id, update_query)
+    if not updated_event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    else:
+        updated_event_out = get_event_out(id=str(updated_event["_id"]), event=updated_event)
+        return updated_event_out
