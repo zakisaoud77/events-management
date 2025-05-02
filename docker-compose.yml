@@ -33,3 +33,12 @@ services:
       PYTHONPATH: /app
     entrypoint: [ "pytest" ]
     command: [ "tests/", "--disable-warnings" ]
+
+  cli:
+    build: .
+    container_name: fastapi-cli
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    entrypoint: ["python", "cli/cli.py"]
