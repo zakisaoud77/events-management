@@ -29,10 +29,11 @@ FastApiEvents
 ├── README.md
 ├── docker-compose.yaml
 ├── requirements.txt
+├── .env.test
 └── .env
 ```
 We can find the following files :
-- settings.py : which contains the mongodb information (the database uri and database name). We use .env file to save the mongodb database information.
+- settings.py : which contains the mongodb information (the database uri and database name). We use .env file to save the mongodb database information (.env.test for the integration test database)
 - mongodb.py : which contains three principal functions : one for mongodb connection creation, second to close the connection and last to get the mongodb database.
 - events_crud.py : which contains the basic functions that we use to create, select, delete or update the different resources on the mongodb database.
 - events_api.py : which contains the different FastApi routes.
@@ -40,6 +41,7 @@ We can find the following files :
 - test_unit_events.py : which contains the unit tests of our FastApi routes.
 - events_cli.py : which contains the definitions of our cli commands.
 - main.py : the entry point of our FastApi application.
+- .env and .env.test : these files are used to save the mongodb databases information.
 
 ###  API routes
 
