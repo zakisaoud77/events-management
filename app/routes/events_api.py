@@ -99,3 +99,37 @@ async def delete_event(
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting event {event_id} because of: {str(e)}")
+
+# Deleting all events
+@router.delete(
+    "/delete_all_events/",
+    summary = "Deleting all events",
+    description = "Deleting all events. If there is some running events, they will be deleted only if `force_delete=true`",
+)
+async def delete_all_events(
+    force_delete: bool = Query(False, description="Force deletion of all events")
+):
+    try:
+        total_events, deleted_events = await events_crud.delete_all_events(force_delete=force_delete)
+        if total_events == deleted_events > 0:
+            return JSONResponse(
+                status_code=200,
+                content=f"All of {deleted_events} events have been deleted successfully"
+            )
+        elif total_events > deleted_events > 0:
+            return JSONResponse(
+                status_code=200,
+                content=f"All of {deleted_events} stopped events have been deleted successfully"
+            )
+        elif total_events == deleted_events == 0:
+            return JSONResponse(
+                status_code=404,
+                content=f"There is no events to delete ! all events have been deleted"
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"We cannot delete events, because there is only running events and force_delete=False"
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting all events because of: {str(e)}")

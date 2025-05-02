@@ -107,3 +107,24 @@ async def delete_event(event_id: str, force_delete: bool = False):
         await db["events"].delete_one({"_id": validated_event_id})
         print(f"event {event_id} has been deleted successfully")
         return True
+
+# Deleting all events
+async def delete_all_events(force_delete: bool = False):
+    now = get_time_now()
+    db = get_db()
+    total_events = await get_all_events(skip=0,limit=100)
+    if force_delete:
+        deleted_events = await db["events"].delete_many({})
+    else:
+        query_stopped_events = {"stop": {"$lte": now}}
+        deleted_events = await db["events"].delete_many(query_stopped_events)
+
+    if deleted_events.deleted_count > 0:
+        print(f"All of {deleted_events.deleted_count} events have been deleted successfully")
+        return total_events["total"], deleted_events.deleted_count
+    elif total_events["total"] != 0 and deleted_events.deleted_count == 0:
+        print(f"There is no events to delete, there is no stopped events and force_delete=False")
+        return total_events["total"], 0
+    else :
+        print(f"There is no events to delete ! all events have been deleted")
+        return 0, 0
