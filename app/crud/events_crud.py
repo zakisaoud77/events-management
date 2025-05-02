@@ -162,3 +162,12 @@ async def updating_event_datetime(event_id:str, start:datetime, stop:datetime=No
     else:
         updated_event_out = get_event_out(id=str(updated_event["_id"]), event=updated_event)
         return updated_event_out
+
+# Updating many events based on tags
+async def update_events_based_on_tags(tags:List[str], start:datetime, stop:datetime=None):
+    db = get_db()
+    result = await db["events"].update_many(
+        {"tags": {"$in": tags}},
+        {"$set": {"start": start, "stop": stop}}
+    )
+    return result.modified_count, result.matched_count

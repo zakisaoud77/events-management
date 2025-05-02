@@ -167,3 +167,33 @@ async def update_event_datetime(
        return updated_event
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cannot update event datetime {event_id}, because of: {str(e)}")
+
+@router.patch(
+    "/update_events_datetime_by_tags",
+    summary = "Updating events datetime based on tags",
+    description = "Updating events stop and start times based on tags",
+)
+async def update_events_datetime_by_tags(
+    tags: List[str] = Query(...),
+    start: datetime = Query(..., description="start datetime"),
+    stop: datetime = Query(None, description="stop datetime"),
+):
+    try:
+       updated_events_count, matched_events_count = await events_crud.update_events_based_on_tags(tags=tags, start=start, stop=stop)
+       if updated_events_count > 0:
+           return JSONResponse(
+               status_code=200,
+               content=f"{updated_events_count} events datetime have been updated successfully"
+           )
+       elif updated_events_count == 0 and matched_events_count > 0:
+           return JSONResponse(
+               status_code=200,
+               content=f"Events with tags {tags} have been already updated with the same start and stop times"
+           )
+       else:
+           return JSONResponse(
+               status_code=404,
+               content=f"There is no events to update with the tags {tags}"
+           )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cannot update events, because of: {str(e)}")
