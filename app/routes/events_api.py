@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Query, Path, Depends, HTTPException
-from app.models.events import EventCreate, EventOut
+from app.models.events import EventCreate, EventOut, EventResponseList
 from app.crud import events_crud
 import asyncio
 
@@ -20,3 +20,20 @@ async def add_event(event: EventCreate):
         return new_event
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cannot create new event because of: {str(e)}")
+
+# Get the list of all events
+@router.get(
+    "/list_events/",
+    summary="List all events",
+    description="Listing all events. To specify how many events you would like to get, you can use skip and limit parameters",
+    response_model=EventResponseList
+)
+async def list_events(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, le=100)
+):
+    try:
+        events_list_from_db = await events_crud.get_all_events(skip, limit)
+        return events_list_from_db
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Cannot get events list, because of: {str(e)}")

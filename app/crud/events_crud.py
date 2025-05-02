@@ -12,3 +12,18 @@ async def create_event(event: EventCreate):
 
 def get_event_out(id: str, event: dict):
     return EventOut(id=id, **event)
+
+# Get the list of all events
+async def get_all_events(skip, limit):
+    db = get_db()
+    events = []
+    total_events = await db["events"].count_documents({})
+    all_events = db["events"].find({}).skip(skip).limit(limit)
+    async for event in all_events:
+        events.append(get_event_out(id=str(event["_id"]), event=event))
+    return {
+        "total": total_events,
+        "skip": skip,
+        "limit": limit,
+        "results": events
+    }

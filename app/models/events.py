@@ -41,3 +41,10 @@ class EventOut(EventCreate):
         description="MongoDB ObjectId of the event",
         examples=["6631c5d82fda6e60f14e2a3a"]
     )
+
+# This model is used to return a list of events
+class EventResponseList(BaseModel):
+    total: int
+    skip: int
+    limit: int
+    results: List[EventOut]
