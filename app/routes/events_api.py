@@ -73,3 +73,28 @@ async def search_events(
         return events_db_list
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Cannot find events, because of: {str(e)}")
+
+# Deleting event from ID
+@router.delete(
+    "/delete_event/{event_id}",
+    summary="Deleting an event",
+    description="Deleting an event by ID. If the event is running, it will be deleted only if `force_delete=true`",
+)
+async def delete_event(
+    event_id: str = Path(...),
+    force_delete: bool = Query(False, description="Force deletion of the event")
+):
+    try:
+        delete_event = await events_crud.delete_event(event_id=event_id, force_delete=force_delete)
+        if delete_event:
+            return JSONResponse(
+                status_code=200,
+                content=f"event {event_id} has been deleted successfully"
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"We cannot delete the event {event_id}, its an ongoing event and force_delete=False"
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting event {event_id} because of: {str(e)}")

@@ -1,6 +1,7 @@
 from app.db.mongodb import get_db
 from app.models.events import EventCreate, EventOut
 import asyncio
+from bson import ObjectId
 from typing import List
 from fastapi import HTTPException
 from datetime import datetime
@@ -18,6 +19,13 @@ def get_event_out(id: str, event: dict):
 
 def get_time_now():
     return datetime.now()
+
+def get_event_id(event_id: str):
+    try:
+        obj_id = ObjectId(event_id)
+        return obj_id
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid event ID format")
 
 # Get the list of all events
 async def get_all_events(skip, limit):
@@ -73,3 +81,29 @@ async def search_event(tags: List[str], skip, limit):
         "limit": limit,
         "results": events
     }
+
+# Deleting event by event_id
+async def delete_event(event_id: str, force_delete: bool = False):
+    validated_event_id  = get_event_id(event_id)
+    db = get_db()
+    event = await db["events"].find_one({"_id": validated_event_id})
+    if not event:
+        raise HTTPException(status_code=404, detail=f"Event with id {event_id} is not found")
+    time_now = get_time_now()
+    is_ongoing = (
+        event["start"] <= time_now and
+        (
+            event.get("stop") is None or event.get("stop") > time_now
+        )
+    )
+    start_in_future  = (event["start"] > time_now)
+    if is_ongoing and not force_delete:
+        print(f"We cannot delete the event {event_id}, its an ongoing event and force_delete=False")
+        return False
+    elif start_in_future and not force_delete:
+        print(f"We cannot delete the event {event_id}, it will start in the future and force_delete=False")
+        return False
+    else:
+        await db["events"].delete_one({"_id": validated_event_id})
+        print(f"event {event_id} has been deleted successfully")
+        return True
