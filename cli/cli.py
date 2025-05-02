@@ -9,8 +9,8 @@ def cli():
     pass
 
 @cli.command("add-event")
-@click.option("--start", required=True, help="Start datetime in ISO format")
-@click.option("--stop", default=None, help="Stop datetime in ISO format")
+@click.option("--start", required=True, help="Start datetime")
+@click.option("--stop", default=None, help="Stop datetime")
 @click.option("--tags", multiple=True, help="Tags for the event")
 def add_event_command(start, stop, tags):
     try:
@@ -47,7 +47,7 @@ async def list_events(skip, limit):
     try:
         events = await events_crud.get_all_events(skip=skip, limit=limit)
         for event in events['results']:
-            click.echo(f"Event with ID:{event.id}, Start time: {event.start} "
+            click.echo(f"Event with ID: {event.id}, Start time: {event.start} "
                        f"- Stop time: {event.stop} | Tags: {event.tags}")
     finally:
         await close_mongodb_connection()
@@ -67,7 +67,7 @@ async def list_running_events(skip, limit):
     try:
         events = await events_crud.get_running_events(skip=skip, limit=limit)
         for event in events['results']:
-            click.echo(f"Running event with ID:{event.id}, Start time: {event.start} "
+            click.echo(f"Running event with ID: {event.id}, Start time: {event.start} "
                        f"- Stop time: {event.stop} | Tags: {event.tags}")
     finally:
         await close_mongodb_connection()
@@ -133,8 +133,70 @@ async def searching_event(tags, skip, limit):
     try:
         events = await events_crud.search_event(tags, skip, limit)
         for event in events['results']:
-            click.echo(f"Found event with ID:{event.id}, Start time: {event.start} "
+            click.echo(f"Found event with ID: {event.id}, Start time: {event.start} "
                        f"- Stop time: {event.stop} | Tags: {event.tags}")
+    finally:
+        await close_mongodb_connection()
+
+@cli.command("update-event-tags")
+@click.option("--event_id")
+@click.option("--replace", default=False)
+@click.option("--tags", multiple=True, help="Tags used for searching events")
+def updating_event_tags_command(event_id, replace, tags):
+    try:
+        asyncio.run(updating_event_tags(event_id, replace, tags))
+    except Exception as e:
+        click.echo(f"Failed: {e}", err=True)
+        raise SystemExit(1)
+
+async def updating_event_tags(event_id, replace, tags):
+    await create_mongodb_connection()
+    try:
+        updated_event = await events_crud.updating_event_tags(event_id, tags, replace)
+        click.echo(f"Updated event: {updated_event}")
+    finally:
+        await close_mongodb_connection()
+
+@cli.command("update-event-datetime")
+@click.option("--event_id")
+@click.option("--start", required=True, help="Start datetime")
+@click.option("--stop", default=None, help="Stop datetime")
+def updating_event_datetime_command(event_id, start, stop):
+    try:
+        asyncio.run(updating_event_date(event_id, start, stop))
+    except Exception as e:
+        click.echo(f"Failed: {e}", err=True)
+        raise SystemExit(1)
+
+async def updating_event_date(event_id, start, stop):
+    await create_mongodb_connection()
+    try:
+        updated_event = await events_crud.updating_event_datetime(event_id, start, stop)
+        click.echo(f"Updated event: {updated_event}")
+    finally:
+        await close_mongodb_connection()
+
+@cli.command("update-event-datetime-by-tags")
+@click.option("--tags", multiple=True, help="Tags used for searching events")
+@click.option("--start", required=True, help="Start datetime")
+@click.option("--stop", default=None, help="Stop datetime")
+def updating_event_datetime_by_tags_command(tags, start, stop):
+    try:
+        asyncio.run(updating_event_date_by_tags(list(tags), start, stop))
+    except Exception as e:
+        click.echo(f"Failed: {e}", err=True)
+        raise SystemExit(1)
+
+async def updating_event_date_by_tags(tags, start, stop):
+    await create_mongodb_connection()
+    try:
+        updated_events_count, matched_events_count = await events_crud.update_events_based_on_tags(tags, start, stop)
+        if updated_events_count > 0:
+            click.echo(f"{updated_events_count} events datetime have been updated successfully")
+        elif updated_events_count == 0 and matched_events_count > 0:
+            click.echo(f"Events with tags {tags} have been already updated with the same start and stop times")
+        else:
+            click.echo(f"There is no events to update with the tags {tags}")
     finally:
         await close_mongodb_connection()
 

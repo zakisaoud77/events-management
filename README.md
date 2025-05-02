@@ -118,7 +118,7 @@ For example :
 
 - If you want to update an event tags, you should use the following command :
 
-```docker-compose run --rm cli update-event-tags --event_id <your-event-id> --tags <your-tag-value> --tags <your-tag-value>```
+```docker-compose run --rm cli update-event-tags --event_id <your-event-id> --tags <your-newtag-value> --tags <your-newtag-value>```
 
 - If you want to replace an event tags, you should use the following command :
 
@@ -128,6 +128,9 @@ For example :
 
 ```docker-compose run --rm cli update-event-datetime --event_id <your-event-id> --start <your-new-start> --stop <your-new-stop>```
 
+- If you want to update the events datetime based on tags, you should use the following command :
+
+```docker-compose run --rm cli update-event-datetime-by-tags --tags <your-tag-value> --start <your-new-start> --stop <your-new-stop>```
 
 ## Testing
 ### Unit Tests:
