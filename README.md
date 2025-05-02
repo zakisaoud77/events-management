@@ -50,7 +50,7 @@ We can find the following files :
 
 ##  Getting Started
 
-To run the application, you should first clone project in your local machine. You need also to install docker in your local machine to can run application and the mongodb database using docker containers. 
+To run this Fastapi application, you should first clone project in your local machine. You should also install docker in your local machine to can execute the docker commands, in order to create Fastapi and mongodb containers, and run the application. 
 
 ```shell script
 # Clone the repository
