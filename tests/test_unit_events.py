@@ -61,3 +61,68 @@ async def test_list_events_mocked(mock_get_events):
     assert len(data["results"]) == 2
     mock_get_events.assert_awaited_once_with(0, 10)
 
+# Test  /running_events
+@pytest.mark.asyncio
+@patch("app.crud.events_crud.get_running_events", new_callable=AsyncMock)
+async def test_running_events_mocked(mock_running_events):
+    mock_running_events.return_value = {
+        "total": 2,
+        "skip": 0,
+        "limit": 10,
+        "results": [
+            {
+                "id": "1",
+                "start": "2024-04-01T12:00:00",
+                "stop": "2026-04-01T14:00:00",
+                "tags": ["Hello", "test2"]
+            },
+            {
+                "id": "2",
+                "start": "2022-05-01T21:00:00",
+                "tags": ["Cloud","AWS"]
+            }
+        ]
+    }
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/events/running_events/?skip=0&limit=10")
+    assert response.status_code == 200
+    data = response.json()
+    assert "total" in data
+    assert len(data["results"]) == 2
+    mock_running_events.assert_awaited_once_with(0, 10)
+
+# Test search events
+@pytest.mark.asyncio
+@patch("app.crud.events_crud.search_event", new_callable=AsyncMock)
+async def test_search_events(mock_search_event):
+    mock_search_event.return_value = {
+        "total": 2,
+        "skip": 0,
+        "limit": 10,
+        "results": [
+            {
+                "id": "1",
+                "start": "2024-01-01T12:00:00",
+                "stop": "2024-01-01T13:00:00",
+                "tags": ["Test1", "Cloud"]
+            },
+            {
+                "id": "2",
+                "start": "2024-02-01T12:00:00",
+                "stop": "2024-02-01T13:00:00",
+                "tags": ["Test2"]
+            }
+        ]
+    }
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/events/search_events/?tags=Test1&skip=0&limit=10")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 2
+    assert len(data["results"]) == 2
+    assert data["results"][0]["tags"] == ["Test1", "Cloud"]
+
