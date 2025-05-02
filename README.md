@@ -19,12 +19,13 @@ FastApiEvents
 │   │   └── events.py
 │   ├── routes
 │   │   └── events_api.py
-│   ├── cli
-│   │   └── events_cli.py
 │   ├── __init__.py
 │   └── main.py
 ├── tests
-│   └── events_api_tests.py
+│   ├── test_unit_events.py
+│   └── test_integration_events.py
+├── cli
+│   └── cli.py
 ├── Dockerfile
 ├── README.md
 ├── docker-compose.yaml
@@ -37,9 +38,9 @@ We can find the following files :
 - mongodb.py : which contains three principal functions : one for mongodb connection creation, second to close the connection and last to get the mongodb database.
 - events_crud.py : which contains the basic functions that we use to create, select, delete or update the different resources on the mongodb database.
 - events_api.py : which contains the different FastApi routes.
-- test_events_api.py : which contains the integration tests of our FastApi routes.
+- test_integration_events.py : which contains the integration tests of our FastApi routes.
 - test_unit_events.py : which contains the unit tests of our FastApi routes.
-- events_cli.py : which contains the definitions of our cli commands.
+- cli.py : which contains the definitions of our cli commands.
 - main.py : the entry point of our FastApi application.
 - .env and .env.test : these files are used to save the mongodb databases information.
 
