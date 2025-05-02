@@ -70,7 +70,7 @@ Afterward, the project will be live at [http://localhost:8000](http://localhost:
 ## Documentation
 
 FastAPI automatically generates documentation based on the specification of the endpoints you have written. You can find the technical documentation and the details of API routes at [http://localhost:8000/docs](http://localhost:5000/docs).
-You can use Postman test the different routes.
+You can use Postman to test the different routes.
 For example:
 
 - To list all events, we use the following url :
