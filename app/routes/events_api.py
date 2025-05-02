@@ -1,5 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Query, Path, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from app.models.events import EventCreate, EventOut, EventResponseList
 from typing import Optional, List
 from app.crud import events_crud
