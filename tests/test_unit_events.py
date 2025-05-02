@@ -126,3 +126,53 @@ async def test_search_events(mock_search_event):
     assert len(data["results"]) == 2
     assert data["results"][0]["tags"] == ["Test1", "Cloud"]
 
+# Test /delete_event
+@pytest.mark.asyncio
+@patch("app.crud.events_crud.delete_event", new_callable=AsyncMock)
+async def test_delete_event_success(mock_delete_event):
+    mock_delete_event.return_value = True
+
+    event_id = "e213124124123"
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.delete(f"/events/delete_event/{event_id}?force_delete=true")
+
+    assert response.status_code == 200
+    assert f"event {event_id} has been deleted successfully" in response.text
+    mock_delete_event.assert_awaited_once_with(event_id=event_id, force_delete=True)
+
+# Test /delete_all_events/
+@pytest.mark.asyncio
+@patch("app.crud.events_crud.delete_all_events", new_callable=AsyncMock)
+async def test_delete_all_events(mock_delete_all_events):
+    mock_delete_all_events.return_value = (3, 3)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.delete(f"/events/delete_all_events/?force_delete=true")
+
+    assert response.status_code == 200
+    assert "3 events have been deleted successfully" in response.text
+    mock_delete_all_events.assert_awaited_once_with(force_delete=True)
+
+# Test "/update_event_tags/
+@pytest.mark.asyncio
+@patch("app.crud.events_crud.updating_event_tags", new_callable=AsyncMock)
+async def test_update_event_tags(mock_update_tags):
+    event_id = "e2131313ef1231233"
+    mock_update_tags.return_value = {
+        "id": event_id,
+        "start": "2023-07-22T13:00:00",
+        "stop": "2024-04-17T19:00:00",
+        "tags": ["Tag1", "Tag2"]
+    }
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.patch(
+            f"/events/update_event_tags/{event_id}/?tags=Tag1&tags=Tag2&replace=True"
+        )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["tags"] == ["Tag1", "Tag2"]
+    assert data["id"] == event_id
+    mock_update_tags.assert_awaited_once_with(event_id=event_id, tags=["Tag1", "Tag2"], replace=True)

@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+asyncio
+typing
+pytest
+pytest-asyncio
+httpx>=0.26.0
+pydantic
+pydantic_settings
+python-dotenv
+motor
+pymongo
