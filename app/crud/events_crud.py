@@ -1,6 +1,8 @@
 from app.db.mongodb import get_db
 from app.models.events import EventCreate, EventOut
 import asyncio
+from typing import List
+from fastapi import HTTPException
 from datetime import datetime
 
 # Create new event
@@ -52,4 +54,22 @@ async def get_running_events(skip, limit):
         "skip": skip,
         "limit": limit,
         "results": running_events
+    }
+
+# Search an event from tags
+async def search_event(tags: List[str], skip, limit):
+    db = get_db()
+    events = []
+    query = {"tags": {"$in": tags}}
+    total_events = await db["events"].count_documents(query)
+    events_db_list = db["events"].find(query).skip(skip).limit(limit)
+    async for event in events_db_list:
+        events.append(get_event_out(id=str(event["_id"]), event=event))
+    if not events:
+        raise HTTPException(status_code=404, detail=f"Events with at least one tag from tags {tags} don't exist")
+    return {
+        "total": total_events,
+        "skip": skip,
+        "limit": limit,
+        "results": events
     }
