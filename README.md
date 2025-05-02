@@ -50,7 +50,7 @@ We can find the following files :
 
 ##  Getting Started
 
-Getting started developing with this template is pretty simple using docker and docker-compose.
+To run the application, you should first clone project in your local machine. You need also to install docker in your local machine to can run application and the mongodb database using docker containers. 
 
 ```shell script
 # Clone the repository
