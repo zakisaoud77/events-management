@@ -176,3 +176,27 @@ async def test_update_event_tags(mock_update_tags):
     assert data["tags"] == ["Tag1", "Tag2"]
     assert data["id"] == event_id
     mock_update_tags.assert_awaited_once_with(event_id=event_id, tags=["Tag1", "Tag2"], replace=True)
+
+@pytest.mark.asyncio
+async def test_add_event_missing_start_attribute():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post("/events/add_event/", json={
+            # "start"
+            "stop": "2025-08-01 10:00:00",
+            "tags": ["Hello", "Test"]
+        })
+
+    assert response.status_code == 422
+
+@pytest.mark.asyncio
+async def test_add_event_bad_date_format():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post("/events/add_event/", json={
+            "start": "04-04-2021 12:00:00",
+            "stop": "2025-08-01 10:00:00",
+            "tags": ["Hello", "Test"]
+        })
+
+    assert response.status_code == 422
