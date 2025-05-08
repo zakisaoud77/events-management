@@ -117,7 +117,12 @@ async def delete_all_events(force_delete: bool = False):
     if force_delete:
         deleted_events = await db["events"].delete_many({})
     else:
-        query_stopped_events = {"stop": {"$lte": now}}
+        query_stopped_events = {
+            "$and": [
+                {"start": {"$lte": now}},
+                {"stop": {"$lte": now}}
+            ]
+        }
         deleted_events = await db["events"].delete_many(query_stopped_events)
 
     if deleted_events.deleted_count > 0:

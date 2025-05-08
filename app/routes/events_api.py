@@ -129,7 +129,7 @@ async def delete_all_events(
         else:
             raise HTTPException(
                 status_code=400,
-                detail=f"We cannot delete events, because there is only running events and force_delete=False"
+                detail=f"We cannot delete events, because there is only running (or future) events and force_delete=False"
             )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting all events because of: {str(e)}")
