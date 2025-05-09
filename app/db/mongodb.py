@@ -13,6 +13,7 @@ async def create_mongodb_connection(retries=10, delay=2):
             mongodb.client = AsyncIOMotorClient(MONGO_URI)
             print("MongoDB connection created")
             await mongodb.client.admin.command("ping")
+            return
         except Exception as e:
             print(f"Cannot connect to mongodb because of {e}")
             await asyncio.sleep(delay)
